@@ -1,0 +1,6 @@
+Heads_allequash.pst  # pest casename
+./ppest		# executable
+50.16.79.218		# host IP address
+4040				# host port
+/home/ubuntu/runner/NODE_1	# node names (repeat once for each node)
+/home/ubuntu/runner/NODE_2
