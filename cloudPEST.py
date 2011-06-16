@@ -1,5 +1,6 @@
 '''
-cloudPEST   version 0.1
+cloudPEST   version 1.0
+	Implementing fixes for proper operation on Windows operating system
 
 a m!ke@usgs joint
 mnfienen@usgs.gov
@@ -16,7 +17,7 @@ full hour rate (see http://aws.amazon.com/ec2/#pricing for details)
 and any instances left running and not properly shut down will incur
 charges as well. 
 
-It is recommended to verify on the AWS console that insntances are
+It is recommended to verify on the AWS console that instances are
 properly stopped or terminated at the end of a session.
 '''
 import os
@@ -93,6 +94,7 @@ def run_instances(ami_id,instance_count,keyname,group,insttype=[],cnodes=[],avai
 	newline_char = determine_newline()
 	# available instance types: this must be updated as new types become available
 	available_instance_types = [
+			't1.micro',
 	        'm1.small',
 	        'm1.large',
 	        'm1.xlarge',
@@ -169,7 +171,7 @@ def start_instances(instance_id):
 		if not isinstance(curr_inst,str):
 			sys.exit('\nERROR: Invalid instance_id provided - must be a string\n'
 			         + curr_inst + ' was the provided instance name')
-		p=sub.Popen(['ec2-start-instances', curr_inst], stdout=sub.PIPE, stderr=sub.PIPE )
+		p=sub.Popen(['ec2-start-instances ' + curr_inst], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 		p.wait()
 		currout,currerr=p.communicate()
 		currerr = parse_errors(currerr, newline_char)
@@ -181,7 +183,7 @@ def start_instances(instance_id):
 				print '\nInstance ' + curr_inst + ' started -- status pending'
 			
 #
-# query_istances
+# query_instances
 #
 def query_instances(specific_instances = []):
 	# find proper newline character for splitting output
@@ -193,10 +195,10 @@ def query_instances(specific_instances = []):
 			a.append(specific_instances)
 			specific_instances = a
 		for curr_inst in specific_instances:
-			if not isinstance(curr_inst):
+			if not isinstance(curr_inst,str):
 				sys.exit('\nERROR: Invalid instance_id provided - must be a string\n'
 			         + curr_inst + ' was the provided instance name')
-			p=sub.Popen(['ec2-describe-instances', curr_inst])
+			p=sub.Popen(['ec2-describe-instances ' + curr_inst],shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
 			currout,currerr=p.communicate()
 			currerr = parse_errors(currerr, newline_char)
 			if len(currerr) > 0:
@@ -206,11 +208,12 @@ def query_instances(specific_instances = []):
 				for line in currout.split(newline_char):
 					if len(line) > 0:
 						if ((line.split()[0] == 'INSTANCE') and 
-						    (line.split()[5] == 'runing')):
-							instances_list = parse_instance_string(instances_list,line)
+						    (line.split()[5] == 'running')):
+						    	instances_list = parse_instance_string(instances_list,line)
+							
 	else:
 		print '\n***\nAll instances will be returned\n***\n'
-		p=sub.Popen(['ec2-describe-instances'], stdout=sub.PIPE, stderr=sub.PIPE )
+		p=sub.Popen(['ec2-describe-instances'], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 		currout,currerr=p.communicate()
 		currerr = parse_errors(currerr, newline_char)
 		if len(currerr) > 0:
@@ -239,7 +242,7 @@ def stop_instances(instance_id):
 		if not isinstance(curr_inst,str):
 			sys.exit('\nERROR: Invalid instance_id provided - must be a string\n'
 			         + curr_inst + ' was the provided instance name')
-		p=sub.Popen(['ec2-stop-instances', curr_inst], stdout=sub.PIPE, stderr=sub.PIPE )
+		p=sub.Popen(['ec2-stop-instances ' + curr_inst], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 		p.wait()
 		currout,currerr=p.communicate()
 		currerr = parse_errors(currerr, newline_char)
@@ -265,7 +268,7 @@ def terminate_instances(instance_id):
 		if not isinstance(curr_inst,str):
 			sys.exit('\nERROR: Invalid instance_id provided - must be a string\n'
 			         + curr_inst + ' was the provided instance name')
-		p=sub.Popen(['ec2-terminate-instances', curr_inst], stdout=sub.PIPE, stderr=sub.PIPE )
+		p=sub.Popen(['ec2-terminate-instances ' + curr_inst], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 		p.wait()
 		currout,currerr=p.communicate()
 		currerr = parse_errors(currerr, newline_char)
