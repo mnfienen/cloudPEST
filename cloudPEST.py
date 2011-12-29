@@ -1,6 +1,8 @@
 '''
 cloudPEST   version 1.0
 	Implementing fixes for proper operation on Windows operating system
+	    version 1.01 
+	Further Windows-related fixes
 
 a m!ke@usgs joint
 mnfienen@usgs.gov
@@ -66,7 +68,7 @@ def query_images():
 	# find proper newline character for splitting output
 	newline_char = determine_newline()
 	ims = images()
-	p=sub.Popen(['ec2-describe-images -o self'],shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
+	p=sub.Popen('ec2-describe-images -o self',shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
 	p.wait()
 	currout,currerr=p.communicate()
 	currerr = parse_errors(currerr, newline_char)
@@ -139,7 +141,7 @@ def run_instances(ami_id,instance_count,keyname,group,insttype=[],cnodes=[],avai
 		runstring += ' -t ' + insttype
 	if avail_default_flag == False:
 		runstring += ' --availability-zone ' + availzone
-	p=sub.Popen(['ec2-run-instances ' + runstring], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
+	p=sub.Popen('ec2-run-instances ' + runstring, shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 	p.wait()
 	currout,currerr=p.communicate()
 	currerr = parse_errors(currerr, newline_char)
@@ -171,7 +173,7 @@ def start_instances(instance_id):
 		if not isinstance(curr_inst,str):
 			sys.exit('\nERROR: Invalid instance_id provided - must be a string\n'
 			         + curr_inst + ' was the provided instance name')
-		p=sub.Popen(['ec2-start-instances ' + curr_inst], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
+		p=sub.Popen('ec2-start-instances ' + curr_inst, shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 		p.wait()
 		currout,currerr=p.communicate()
 		currerr = parse_errors(currerr, newline_char)
@@ -198,7 +200,7 @@ def query_instances(specific_instances = []):
 			if not isinstance(curr_inst,str):
 				sys.exit('\nERROR: Invalid instance_id provided - must be a string\n'
 			         + curr_inst + ' was the provided instance name')
-			p=sub.Popen(['ec2-describe-instances ' + curr_inst],shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
+			p=sub.Popen('ec2-describe-instances ' + curr_inst,shell=True, stdout=sub.PIPE, stderr=sub.PIPE)
 			currout,currerr=p.communicate()
 			currerr = parse_errors(currerr, newline_char)
 			if len(currerr) > 0:
@@ -213,7 +215,7 @@ def query_instances(specific_instances = []):
 							
 	else:
 		print '\n***\nAll instances will be returned\n***\n'
-		p=sub.Popen(['ec2-describe-instances'], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
+		p=sub.Popen('ec2-describe-instances', shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 		currout,currerr=p.communicate()
 		currerr = parse_errors(currerr, newline_char)
 		if len(currerr) > 0:
@@ -242,13 +244,13 @@ def stop_instances(instance_id):
 		if not isinstance(curr_inst,str):
 			sys.exit('\nERROR: Invalid instance_id provided - must be a string\n'
 			         + curr_inst + ' was the provided instance name')
-		p=sub.Popen(['ec2-stop-instances ' + curr_inst], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
+		p=sub.Popen('ec2-stop-instances ' + curr_inst, shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 		p.wait()
 		currout,currerr=p.communicate()
 		currerr = parse_errors(currerr, newline_char)
 		if len(currerr) > 0:
 			cmsg = '\nERROR: Instance ' + curr_inst + ' could not be stopped.'
-			error_handler('ec2-start-instances',cmsg,currerr)
+			error_handler('ec2-stop-instances',cmsg,currerr)
 		else:
 			if ((currout[0] == 'INSTANCE') and (currout[1] == curr_inst)):
 				print '\nInstance ' + curr_inst + ' stopped -- status: ' + currout[-1]
@@ -268,7 +270,7 @@ def terminate_instances(instance_id):
 		if not isinstance(curr_inst,str):
 			sys.exit('\nERROR: Invalid instance_id provided - must be a string\n'
 			         + curr_inst + ' was the provided instance name')
-		p=sub.Popen(['ec2-terminate-instances ' + curr_inst], shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
+		p=sub.Popen('ec2-terminate-instances ' + curr_inst, shell=True, stdout=sub.PIPE, stderr=sub.PIPE )
 		p.wait()
 		currout,currerr=p.communicate()
 		currerr = parse_errors(currerr, newline_char)

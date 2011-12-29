@@ -15,7 +15,7 @@ for i,j in enumerate(myims.ami_id):
 run_instances(myims.ami_id[0], 1, 'mnf_office','mnf_runner',insttype='t1.micro')
 
 # query instances to see what's running
-myisnt = query_instances()
+myinst = query_instances()
 
 mycurrinst = query_instances(specific_instances = myinst.instance_id[0])
 
